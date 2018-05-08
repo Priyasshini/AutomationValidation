@@ -3,7 +3,6 @@ package com.test.sample.project.seleniumautomation;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -268,7 +267,7 @@ public class ProductValidationWithMethods {
 			}
 			
 			System.out.println("/****The size of Key set is:" + keyset.size() + "************/");
-			((Closeable) workbook).close();
+			//workbook.close;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
