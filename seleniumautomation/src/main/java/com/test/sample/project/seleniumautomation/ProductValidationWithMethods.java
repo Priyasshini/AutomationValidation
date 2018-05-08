@@ -78,7 +78,7 @@ public class ProductValidationWithMethods {
 			for (String url : keyset) {
 
 				driver.get(url);
-                
+                System.out.println("Opening the url: "+url);
 				//Handling URL for MultiCountries
 				if (url.contains("en_eur")) {
 
