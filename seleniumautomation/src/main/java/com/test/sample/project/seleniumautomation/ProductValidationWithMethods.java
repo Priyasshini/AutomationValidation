@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.text.ParseException;
 import javax.imageio.ImageIO;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,7 +36,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.openqa.selenium.Cookie;
-
+import ru.yandex.qatools.allure.annotations.Step;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
 
@@ -45,78 +44,81 @@ public class ProductValidationWithMethods {
 	static WebDriver driver = null;
 	private static Map<String, String> resultsMap = new HashMap<String, String>();
 	private static HashSet<String> keyset = new HashSet<String>();
-	private static String variant = null;
+//	private static Map<int, String[]> resultsMap = new HashMap<int, String[]>();
+    private static String variant = null;
+	
 
 	@Test
 	private static void start() throws Exception {
 
-		System.setProperty("webdriver.chrome.driver",
-				"C:\\Users\\apurva.c.sharma\\validation\\seleniumautomation\\utils\\chromedriver.exe");
-
+		System.setProperty("webdriver.chrome.driver",System.getProperty("user.dir") + "\\utils\\chromedriver.exe");
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
 		openUrl();
 
 	}
-
+     @Step("Open Url and handle Notifications")
 	private static void openUrl() throws InterruptedException, ParseException {
 
-		driver.get("http://int-www2.hm.com/en_gb/index.html");
-		Thread.sleep(1000);
-		if (isElementPresent())
-			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
-		if (isElementPresentNotification())
-			driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).click();
-		Thread.sleep(1000);
-
-		driver.get("http://tst-www2.hm.com/en_gb/index.html");
-		Thread.sleep(1000);
-		if (isElementPresent())
-			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
-
+    	 //Handle Notifications at different environments( int and tst)
+          driver.get("http://int-www2.hm.com/en_gb/index.html");
+          Thread.sleep(1000);
+          if(isElementPresent())
+          driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
+          if(isElementPresentNotification())
+          driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).click();
+          Thread.sleep(1000);  
+          
+          driver.get("http://tst-www2.hm.com/en_gb/index.html");
+          Thread.sleep(1000);
+          if(isElementPresent())
+              driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
+		
+          //Getting the url from set and checking whether the item is present or not 
 		try {
 			for (String url : keyset) {
 
 				driver.get(url);
-
+                
+				//Handling URL for MultiCountries
 				if (url.contains("en_eur")) {
 
-					addMultiCountryCookieOnEntrancePage("el_GR"); // Greece
-					driver.get(url);
-
+				
+						addMultiCountryCookieOnEntrancePage("el_GR"); // Greece
+						driver.get(url);
+					
 				} else if (url.contains("en_asia1")) {
-
-					addMultiCountryCookieOnEntrancePage("en_HK"); // Hongkong
-					driver.get(url);
-
+					
+						addMultiCountryCookieOnEntrancePage("en_HK"); // Hongkong
+						driver.get(url);
+					
 				}
 
 				else if (url.contains("en_asia2")) {
-
-					addMultiCountryCookieOnEntrancePage("en_SG"); // Singapore
-					driver.get(url);
-
+				
+						addMultiCountryCookieOnEntrancePage("en_SG"); // Singapore
+						driver.get(url);
+					
 				} else if (url.contains("en_asia3")) {
-
-					addMultiCountryCookieOnEntrancePage("en_TW"); // Taiwan
-					driver.get(url);
-
+					
+						addMultiCountryCookieOnEntrancePage("en_TW"); // Taiwan
+						driver.get(url);
+					
 				} else if (url.contains("en_asia4")) {
-
-					addMultiCountryCookieOnEntrancePage("ms_MY"); // Malaysia
-					driver.get(url);
-
+					
+						addMultiCountryCookieOnEntrancePage("ms_MY"); // Malaysia
+						driver.get(url);
+					
 				} else if (url.contains("en_asia5")) {
-
-					addMultiCountryCookieOnEntrancePage("en_PH"); // philipines
-					driver.get(url);
-
+					
+						addMultiCountryCookieOnEntrancePage("en_PH"); // philipines
+						driver.get(url);
 				}
 
 				Thread.sleep(2000);
 				if ((driver.findElements(By.xpath("//div[@class='module product-description sticky-wrapper']"))
 						.size() != 0)) {
-
+                // Verify whether the product image is displayed or not 
 					verifyProductImage(driver);
 				} else {
 					resultsMap.put(driver.getCurrentUrl(), "No Item Found error");
@@ -128,7 +130,7 @@ public class ProductValidationWithMethods {
 
 		}
 	}
-
+    @Step("Comparing Every Product Image with the H&M Reference Image") 
 	private static void verifyProductImage(WebDriver driver) throws InterruptedException {
 		String imageUrl = driver.findElement(By.xpath("//*[@id=\"main-content\"]/div[1]/div[2]/div[1]/figure/div/img"))
 				.getAttribute("src");
@@ -136,7 +138,6 @@ public class ProductValidationWithMethods {
 		try {
 
 			Thread.sleep(3000);
-
 			URL url = new URL(imageUrl);
 			InputStream is = url.openStream();
 			Image image = ImageIO.read(is);
@@ -148,21 +149,21 @@ public class ProductValidationWithMethods {
 			ImageIO.write((RenderedImage) image, "jpg", destinationFile);
 			expectedImage = ImageIO.read(new File(System.getProperty("user.dir") + "\\utils\\image.jpg"));
 			ImageDiffer imgDiff = new ImageDiffer();
+			//Ashot method to compare the images
 			ImageDiff diff = imgDiff.makeDiff((BufferedImage) image, expectedImage);
-			if (diff.hasDiff()) {
+			if (diff.hasDiff()) 
+				//getting the size of each variant of the products
 				verifySizeIsEnabled(driver, "Product Image is displayed");
 
-			} else {
-
+		    else 
 				verifySizeIsEnabled(driver, "No Image is displayed");
-
-			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Step("Getting the size of each variant and checking for the stock(Few pieces left/Out of Stock)")  
 	private static void verifySizeIsEnabled(WebDriver driver, String image) {
 		String sizeResult = null;
 
@@ -189,6 +190,7 @@ public class ProductValidationWithMethods {
 							By.xpath("//div[@class='product-item-buttons']//div[contains(@class,'picker')]/ul/li["
 									+ (i + 1) + "]//span[2]"));
 					if (stockLeft == true) {
+						//Getting whether the item is out of stock or few pieces left
 						sizeResult = checkStock(i);
 
 					} else {
@@ -229,10 +231,10 @@ public class ProductValidationWithMethods {
 	}
 
 	@BeforeTest
+	@Step(" Reading the data from excel and store the data into the hash set")
 	public void readExcel() {
 		try {
-			File folder = new File("C:\\Users\\apurva.c.sharma\\validation\\seleniumautomation\\AutomationOutput");
-
+			File folder = new File(System.getProperty("user.dir") + "\\AutomationOutput");
 			if (!folder.exists()) {
 				folder.mkdirs();
 				System.out.println("Created the output folder");
@@ -240,7 +242,7 @@ public class ProductValidationWithMethods {
 				System.out.println("Folder already exists");
 			}
 
-			File f = new File("C:\\Users\\apurva.c.sharma\\validation\\seleniumautomation\\utils\\Test_Data.xlsx");
+			File f = new File(System.getProperty("user.dir") +"\\utils\\Test_Data.xlsx");
 			FileInputStream fileIn = new FileInputStream(f);
 
 			XSSFWorkbook workbook = new XSSFWorkbook(fileIn);
@@ -252,10 +254,10 @@ public class ProductValidationWithMethods {
 					continue;
 				} else {
 					Cell c = row.getCell(0);
-
+					
 					if (c == null) {
 						// Nothing in the cell in this row, skip it
-
+				
 					} else {
 
 						keyset.add(c.getStringCellValue());
@@ -264,7 +266,7 @@ public class ProductValidationWithMethods {
 				}
 
 			}
-
+			
 			System.out.println("/****The size of Key set is:" + keyset.size() + "************/");
 			((Closeable) workbook).close();
 		} catch (Exception e) {
@@ -273,14 +275,16 @@ public class ProductValidationWithMethods {
 	}
 
 	@AfterTest
+	@Step("Generating the Output Sheet in the Automation Output Folder")
 	private static void printResults() {
 		driver.quit();
+		
 
 		try {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
 			Date date = new Date();
 			FileOutputStream out = new FileOutputStream(
-					new File("C:\\Users\\apurva.c.sharma\\validation\\seleniumautomation\\TestOutput\\"
+					new File(System.getProperty("user.dir") + "\\AutomationOutput\\"
 							+ dateFormat.format(date) + "_Automation Report.xlsx"));
 
 			XSSFWorkbook workbook2 = new XSSFWorkbook();
@@ -302,7 +306,10 @@ public class ProductValidationWithMethods {
 
 			Cell cell2 = row.createCell(1);
 			cell2.setCellValue("Message");
-			
+			/*
+			 * sheet2.setColumnWidth(0, 12000); sheet2.setColumnWidth(1, 12000);
+			 */
+
 			for (String key : resultsMap.keySet()) {
 
 				row = sheet2.createRow(rownum++);
@@ -311,27 +318,25 @@ public class ProductValidationWithMethods {
 				Cell cellsecond = row.createCell(1);
 				cellsecond.setCellValue(resultsMap.get(key));
 				if (resultsMap.get(key).contains("Product Image is displayed")) {
-
+			
 					cellsecond.setCellStyle(stylesuccess);
 				}
 				if (resultsMap.get(key).contains("error") || resultsMap.get(key).contains("No Image")
 						|| resultsMap.get(key).contains("Stock")) {
-
+					
 					cellsecond.setCellStyle(style);
 				}
 			}
 
 			autoSizeColumns(workbook2);
-
 			workbook2.write(out);
-
 			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
-
+   @Step("Formatting the Output Sheet")  
 	public static void autoSizeColumns(Workbook workbook) {
 		int numberOfSheets = workbook.getNumberOfSheets();
 		for (int i = 0; i < numberOfSheets; i++) {
@@ -348,49 +353,47 @@ public class ProductValidationWithMethods {
 		}
 	}
 
-	// @Test("Add market specific cookie to the browser")
+	@Step("Add market specific cookie to the browser")
 	public static void addMultiCountryCookieOnEntrancePage(String Market_Category) throws ParseException {
 
 		Date date = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy").parse("Sat Nov 26 15:14:00 IST 2018");
 		driver.manage().addCookie(new Cookie("HMCORP_locale", Market_Category, ".hm.com", "/", date));
 
 	}
-
+    @Step("Check product's stock")
 	public static String checkStock(int i) {
-		String stockResult;
+		String res;
 		String classname = driver.findElement(By.xpath(
 				"//div[@class='product-item-buttons']//div[contains(@class,'picker')]/ul/li[" + (i + 1) + "]//span[2]"))
 				.getAttribute("class");
-
-		if (classname.equalsIgnoreCase("info warning"))
-			stockResult = "Few Pieces Left";
-
-		else
-			stockResult = "Out Of Stock";
-
-		return stockResult;
+		
+		if (classname.equalsIgnoreCase("info warning")) 
+			res = "Few Pieces Left";
+		
+		else 
+			res = "Out Of Stock";
+			
+return res;
 
 	}
-
 	public static boolean isElementPresent() {
-
-		try {
-			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).isDisplayed();
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+        
+        try {
+            driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).isDisplayed();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+	}
+public static boolean isElementPresentNotification() {
+        
+        try {
+        	driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).isDisplayed();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
 	}
 
-	public static boolean isElementPresentNotification() {
-
-		try {
-			driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']"))
-					.isDisplayed();
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
 
 }
