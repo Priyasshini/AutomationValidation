@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:test-suite start="1523441638403" stop="1523441714946" version="1.4.15" xmlns:ns2="urn:model.allure.qatools.yandex.ru">
+    <name>Default suite : Default test</name>
+    <title>Default suite : Default test</title>
+    <test-cases>
+        <test-case start="1523441638598" stop="1523441714127" status="passed">
+            <name>start</name>
+            <steps/>
+            <attachments/>
+            <labels>
+                <label name="host" value="DDC5-D-78KFNK2"/>
+                <label name="thread" value="7804@DDC5-D-78KFNK2.main(1)"/>
+            </labels>
+        </test-case>
+    </test-cases>
+    <labels>
+        <label name="framework" value="TestNG"/>
+        <label name="language" value="JAVA"/>
+    </labels>
+</ns2:test-suite>
