@@ -3,12 +3,12 @@ package com.test.sample.project.seleniumautomation;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,10 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import java.text.DateFormat;
 import java.text.ParseException;
-
 import javax.imageio.ImageIO;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -33,18 +30,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.openqa.selenium.Cookie;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
 
@@ -53,7 +46,6 @@ public class ProductValidationWithMethods {
 	private static Map<String, String> resultsMap = new HashMap<String, String>();
 	private static HashSet<String> keyset = new HashSet<String>();
 	private static String variant = null;
-	
 
 	@Test
 	private static void start() throws Exception {
@@ -66,22 +58,22 @@ public class ProductValidationWithMethods {
 		openUrl();
 
 	}
-     
+
 	private static void openUrl() throws InterruptedException, ParseException {
 
-          driver.get("http://int-www2.hm.com/en_gb/index.html");
-          Thread.sleep(1000);
-          if(isElementPresent())
-          driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
-          if(isElementPresentNotification())
-          driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).click();
-          Thread.sleep(1000);  
-          
-          driver.get("http://tst-www2.hm.com/en_gb/index.html");
-          Thread.sleep(1000);
-          if(isElementPresent())
-              driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
-		
+		driver.get("http://int-www2.hm.com/en_gb/index.html");
+		Thread.sleep(1000);
+		if (isElementPresent())
+			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
+		if (isElementPresentNotification())
+			driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).click();
+		Thread.sleep(1000);
+
+		driver.get("http://tst-www2.hm.com/en_gb/index.html");
+		Thread.sleep(1000);
+		if (isElementPresent())
+			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).click();
+
 		try {
 			for (String url : keyset) {
 
@@ -89,37 +81,36 @@ public class ProductValidationWithMethods {
 
 				if (url.contains("en_eur")) {
 
-				
-						addMultiCountryCookieOnEntrancePage("el_GR"); // Greece
-						driver.get(url);
-					
+					addMultiCountryCookieOnEntrancePage("el_GR"); // Greece
+					driver.get(url);
+
 				} else if (url.contains("en_asia1")) {
-					
-						addMultiCountryCookieOnEntrancePage("en_HK"); // Hongkong
-						driver.get(url);
-					
+
+					addMultiCountryCookieOnEntrancePage("en_HK"); // Hongkong
+					driver.get(url);
+
 				}
 
 				else if (url.contains("en_asia2")) {
-				
-						addMultiCountryCookieOnEntrancePage("en_SG"); // Singapore
-						driver.get(url);
-					
+
+					addMultiCountryCookieOnEntrancePage("en_SG"); // Singapore
+					driver.get(url);
+
 				} else if (url.contains("en_asia3")) {
-					
-						addMultiCountryCookieOnEntrancePage("en_TW"); // Taiwan
-						driver.get(url);
-					
+
+					addMultiCountryCookieOnEntrancePage("en_TW"); // Taiwan
+					driver.get(url);
+
 				} else if (url.contains("en_asia4")) {
-					
-						addMultiCountryCookieOnEntrancePage("ms_MY"); // Malaysia
-						driver.get(url);
-					
+
+					addMultiCountryCookieOnEntrancePage("ms_MY"); // Malaysia
+					driver.get(url);
+
 				} else if (url.contains("en_asia5")) {
-					
-						addMultiCountryCookieOnEntrancePage("en_PH"); // philipines
-						driver.get(url);
-					
+
+					addMultiCountryCookieOnEntrancePage("en_PH"); // philipines
+					driver.get(url);
+
 				}
 
 				Thread.sleep(2000);
@@ -163,7 +154,6 @@ public class ProductValidationWithMethods {
 
 			} else {
 
-				
 				verifySizeIsEnabled(driver, "No Image is displayed");
 
 			}
@@ -262,10 +252,10 @@ public class ProductValidationWithMethods {
 					continue;
 				} else {
 					Cell c = row.getCell(0);
-					
+
 					if (c == null) {
 						// Nothing in the cell in this row, skip it
-				
+
 					} else {
 
 						keyset.add(c.getStringCellValue());
@@ -274,9 +264,9 @@ public class ProductValidationWithMethods {
 				}
 
 			}
-			
+
 			System.out.println("/****The size of Key set is:" + keyset.size() + "************/");
-			workbook.close();
+			((Closeable) workbook).close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -285,7 +275,6 @@ public class ProductValidationWithMethods {
 	@AfterTest
 	private static void printResults() {
 		driver.quit();
-		
 
 		try {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
@@ -313,10 +302,7 @@ public class ProductValidationWithMethods {
 
 			Cell cell2 = row.createCell(1);
 			cell2.setCellValue("Message");
-			/*
-			 * sheet2.setColumnWidth(0, 12000); sheet2.setColumnWidth(1, 12000);
-			 */
-
+			
 			for (String key : resultsMap.keySet()) {
 
 				row = sheet2.createRow(rownum++);
@@ -325,12 +311,12 @@ public class ProductValidationWithMethods {
 				Cell cellsecond = row.createCell(1);
 				cellsecond.setCellValue(resultsMap.get(key));
 				if (resultsMap.get(key).contains("Product Image is displayed")) {
-			
+
 					cellsecond.setCellStyle(stylesuccess);
 				}
 				if (resultsMap.get(key).contains("error") || resultsMap.get(key).contains("No Image")
 						|| resultsMap.get(key).contains("Stock")) {
-					
+
 					cellsecond.setCellStyle(style);
 				}
 			}
@@ -371,41 +357,40 @@ public class ProductValidationWithMethods {
 	}
 
 	public static String checkStock(int i) {
-		String res;
-		String size = driver.findElement(By.xpath(
-				"//div[@class='product-item-buttons']//div[contains(@class,'picker')]/ul/li[" + (i + 1) + "]//span[1]"))
-				.getText();
+		String stockResult;
 		String classname = driver.findElement(By.xpath(
 				"//div[@class='product-item-buttons']//div[contains(@class,'picker')]/ul/li[" + (i + 1) + "]//span[2]"))
 				.getAttribute("class");
-		
-		if (classname.equalsIgnoreCase("info warning")) 
-			res = "Few Pieces Left";
-		
-		else 
-			res = "Out Of Stock";
-			
-return res;
+
+		if (classname.equalsIgnoreCase("info warning"))
+			stockResult = "Few Pieces Left";
+
+		else
+			stockResult = "Out Of Stock";
+
+		return stockResult;
 
 	}
+
 	public static boolean isElementPresent() {
-        
-        try {
-            driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).isDisplayed();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-	}
-public static boolean isElementPresentNotification() {
-        
-        try {
-        	driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']")).isDisplayed();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+
+		try {
+			driver.findElement(By.xpath("//button[@class='close icon-close-white js-close']")).isDisplayed();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
+	public static boolean isElementPresentNotification() {
+
+		try {
+			driver.findElement(By.xpath("//button[@class='button modalconfirm modalclose js-read-gdpr']"))
+					.isDisplayed();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 }
